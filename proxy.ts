@@ -1,7 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED = ["/issues", "/settings"];
+const PROTECTED = ["/issues", "/settings", "/admin"];
+const REF_COOKIE = "fp_ref";
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -32,12 +33,23 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", path);
-    return NextResponse.redirect(url);
+    return carryRef(request, NextResponse.redirect(url));
   }
 
-  return response;
+  return carryRef(request, response);
 }
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico|api/|.*\\.(?:png|jpg|jpeg|svg|webp)$).*)"],
 };
+
+/** First-touch creator tracking: ?ref=name sets a 30-day cookie unless one already exists. */
+function carryRef(request: NextRequest, res: NextResponse) {
+  const raw = request.nextUrl.searchParams.get("ref");
+  if (!raw || request.cookies.get(REF_COOKIE)) return res;
+  const ref = raw.toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 40);
+  if (ref) {
+    res.cookies.set(REF_COOKIE, ref, { maxAge: 60 * 60 * 24 * 30, path: "/", sameSite: "lax", httpOnly: true });
+  }
+  return res;
+}

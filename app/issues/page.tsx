@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { requireUser } from "@/lib/supabase/server";
 import { AppHeader } from "@/components/Logo";
 import { StatusStamp, SeverityPill } from "@/components/Badges";
@@ -23,9 +24,13 @@ export default async function IssuesPage() {
   const { supabase, user } = await requireUser();
   if (!user) redirect("/login");
 
+  // First-touch attribution: records which creator link brought this user. Insert-only, ignored if already set.
+  const ref = (await cookies()).get("fp_ref")?.value || "direct";
+
   const [{ data: issues }, { data: profile }] = await Promise.all([
     supabase.from("issues").select("*").order("created_at", { ascending: false }),
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle<Profile>(),
+    supabase.from("attributions").upsert({ user_id: user.id, ref }, { onConflict: "user_id", ignoreDuplicates: true }),
   ]);
 
   const needsProfile = !profile?.full_name || !profile?.property_address;
