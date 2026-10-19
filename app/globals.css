@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #f6f3ec;
+  --color-ink: #16140f;
+  --color-muted: #6b665b;
+  --color-line: #ddd7ca;
+  --color-hivis: #ffd400;
+  --color-alert: #e5482d;
+  --color-ok: #1f7a4d;
+  --font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+html,
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+}
+
+@utility card {
+  @apply rounded-2xl border border-line bg-white;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-base font-bold transition active:scale-[0.98] disabled:opacity-50;
+}
+@utility btn-primary {
+  @apply btn bg-ink text-paper;
+}
+@utility btn-hivis {
+  @apply btn bg-hivis text-ink;
+}
+@utility btn-ghost {
+  @apply btn border border-line bg-white text-ink;
+}
+
+@utility field {
+  @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-base outline-none focus:border-ink;
+}
+@utility label {
+  @apply mb-1.5 block text-sm font-semibold text-muted;
+}
+
+@utility stamp {
+  @apply inline-block -rotate-3 rounded-md border-2 px-2 py-0.5 font-mono text-[11px] font-bold uppercase tracking-widest;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+  .card {
+    border: none;
+  }
+}
