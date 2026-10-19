@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { Footer } from "@/components/LegalPage";
 
 const steps = [
   { n: "01", t: "Snap it", d: "Take a photo of the mould, leak, broken boiler or dead smoke alarm." },
@@ -72,11 +73,7 @@ export default function Home() {
         </p>
       </section>
 
-      <footer className="mt-16 border-t border-line pt-6 text-xs leading-relaxed text-muted">
-        Fixproof provides information and letter templates, not legal advice. For advice on your situation contact
-        Shelter, Citizens Advice or a housing solicitor. Covers private tenancies in England only — the law differs in
-        Scotland, Wales and Northern Ireland.
-      </footer>
+      <Footer />
     </main>
   );
 }

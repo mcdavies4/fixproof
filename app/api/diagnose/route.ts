@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { CATEGORY_KEYS, SEVERITY_KEYS } from "@/lib/legal";
+import { SITE } from "@/lib/site";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -56,8 +57,29 @@ export async function POST(req: Request) {
   if (!process.env.ANTHROPIC_API_KEY)
     return NextResponse.json({ error: "Server missing ANTHROPIC_API_KEY." }, { status: 500 });
 
+  // Daily cap per user (rolling 24h). Rows are insert-only, so it can't be reset client-side.
+  const since = new Date(Date.now() - 86_400_000).toISOString();
+  const { count, error: countErr } = await supabase
+    .from("ai_usage")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .gte("created_at", since);
+  if (countErr) {
+    console.error("usage check failed", countErr);
+    return NextResponse.json({ error: "Something went wrong. Try again shortly." }, { status: 500 });
+  }
+  if ((count ?? 0) >= SITE.dailyDiagnoseLimit) {
+    return NextResponse.json(
+      { error: `You've reached today's limit of ${SITE.dailyDiagnoseLimit} photo checks. Try again tomorrow.` },
+      { status: 429 }
+    );
+  }
+
   const parsed = Input.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Bad request." }, { status: 400 });
+
+  // Count the attempt before calling the AI, so failed or repeated calls still count.
+  await supabase.from("ai_usage").insert({ user_id: user.id, kind: "diagnose" });
 
   const { images, note } = parsed.data;
   const client = new Anthropic();

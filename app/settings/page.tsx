@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { SITE } from "@/lib/site";
 import { requireUser } from "@/lib/supabase/server";
 import { AppHeader } from "@/components/Logo";
 import { saveProfile } from "@/app/actions";
@@ -67,6 +69,14 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
 
           <button className="btn-primary w-full">Save</button>
         </form>
+
+        <p className="mt-10 text-center text-xs text-muted">
+          <Link href="/privacy" className="underline">Privacy</Link> ·{" "}
+          <Link href="/terms" className="underline">Terms</Link> · To delete your account, email{" "}
+          <a href={`mailto:${SITE.contactEmail}?subject=Delete my Fixproof account`} className="underline">
+            {SITE.contactEmail}
+          </a>
+        </p>
       </main>
     </>
   );
