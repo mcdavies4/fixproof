@@ -2,8 +2,7 @@
 // To add a creator: add their handle (lowercase, letters/numbers/-/_), commit, push. Live in ~1 minute.
 // Unknown handles 404, so typos don't pollute your stats.
 export const CREATORS: string[] = [
-  // "amara",
-  // "rentingwithjay",
+  "sourcers", // property sourcers WhatsApp group
 ];
 
 // Never usable as handles — these are real pages.
