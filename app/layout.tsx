@@ -1,10 +1,18 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
+const title = "Fixproof — get your landlord to fix it";
+const description =
+  "Snap the problem, get a formal repair letter in seconds, and keep timestamped evidence. Free for private renters in England.";
+
 export const metadata: Metadata = {
-  title: "Fixproof — get your landlord to fix it",
-  description:
-    "Snap the problem, get a formal repair letter in seconds, and keep timestamped evidence. For private renters in England.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://fixproof.co.uk"),
+  title,
+  description,
+  applicationName: "Fixproof",
+  openGraph: { title, description, siteName: "Fixproof", locale: "en_GB", type: "website", url: "/" },
+  twitter: { card: "summary_large_image", title, description },
+  appleWebApp: { title: "Fixproof", capable: true, statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {

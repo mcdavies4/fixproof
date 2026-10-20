@@ -1,10 +1,24 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { creatorFromPath } from "@/lib/creators";
 
 const PROTECTED = ["/issues", "/settings", "/admin"];
 const REF_COOKIE = "fp_ref";
 
 export async function proxy(request: NextRequest) {
+  // Creator short link: fixproof.co.uk/amara -> homepage, first-touch credit to "amara".
+  const creator = creatorFromPath(request.nextUrl.pathname);
+  if (creator) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    url.search = "";
+    const res = NextResponse.redirect(url, 307);
+    if (!request.cookies.get(REF_COOKIE)) {
+      res.cookies.set(REF_COOKIE, creator, { maxAge: 60 * 60 * 24 * 30, path: "/", sameSite: "lax", httpOnly: true });
+    }
+    return res;
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -40,7 +54,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/|.*\\.(?:png|jpg|jpeg|svg|webp)$).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|api/|.*\\.(?:png|jpg|jpeg|svg|webp|ico)$).*)"],
 };
 
 /** First-touch creator tracking: ?ref=name sets a 30-day cookie unless one already exists. */
